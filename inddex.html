@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>YouTube Embed Generator</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #111827;
+      color: #f9fafb;
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 700px;
+      background: #1f2937;
+      padding: 32px;
+      border-radius: 16px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+    }
+
+    h1 {
+      margin-top: 0;
+      margin-bottom: 12px;
+      font-size: 2rem;
+    }
+
+    p {
+      color: #d1d5db;
+      margin-bottom: 24px;
+      line-height: 1.5;
+    }
+
+    input {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 10px;
+      background: #374151;
+      color: white;
+      font-size: 1rem;
+      margin-bottom: 16px;
+      outline: none;
+    }
+
+    button {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 10px;
+      background: #ef4444;
+      color: white;
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+
+    button:hover {
+      background: #dc2626;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 180px;
+      margin-top: 20px;
+      padding: 14px;
+      border: none;
+      border-radius: 10px;
+      background: #111827;
+      color: #93c5fd;
+      font-size: 0.95rem;
+      resize: vertical;
+      outline: none;
+    }
+
+    .copy-btn {
+      margin-top: 12px;
+      background: #2563eb;
+    }
+
+    .copy-btn:hover {
+      background: #1d4ed8;
+    }
+
+    .preview {
+      margin-top: 24px;
+    }
+
+    iframe {
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      border: none;
+      border-radius: 12px;
+      margin-top: 12px;
+    }
+
+    .error {
+      color: #fca5a5;
+      margin-top: 12px;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>YouTube Embed Generator</h1>
+    <p>Paste a YouTube link below to instantly generate iframe embed code.</p>
+
+    <input
+      type="text"
+      id="youtubeUrl"
+      placeholder="https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+    />
+
+    <button onclick="generateEmbed()">Generate Embed Code</button>
+
+    <div class="error" id="errorMessage">
+      Invalid YouTube URL.
+    </div>
+
+    <textarea id="embedCode" readonly placeholder="Your iframe embed code will appear here..."></textarea>
+
+    <button class="copy-btn" onclick="copyCode()">Copy Code</button>
+
+    <div class="preview" id="preview"></div>
+  </div>
+
+  <script>
+    function extractVideoId(url) {
+      const patterns = [
+        /(?:youtube\.com\/watch\?v=)([^&]+)/,
+        /(?:youtu\.be\/)([^?&]+)/,
+        /(?:youtube\.com\/embed\/)([^?&]+)/,
+        /(?:youtube\.com\/shorts\/)([^?&]+)/
+      ];
+
+      for (const pattern of patterns) {
+        const match = url.match(pattern);
+        if (match && match[1]) {
+          return match[1];
+        }
+      }
+
+      return null;
+    }
+
+    function generateEmbed() {
+      const url = document.getElementById('youtubeUrl').value.trim();
+      const output = document.getElementById('embedCode');
+      const preview = document.getElementById('preview');
+      const error = document.getElementById('errorMessage');
+
+      const videoId = extractVideoId(url);
+
+      if (!videoId) {
+        error.style.display = 'block';
+        output.value = '';
+        preview.innerHTML = '';
+        return;
+      }
+
+      error.style.display = 'none';
+
+      const embedUrl = `https://www.youtube.com/embed/${videoId}`;
+
+      const iframeCode = `<iframe width="560" height="315" src="${embedUrl}" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>`;
+
+      output.value = iframeCode;
+
+      preview.innerHTML = `
+        <h3>Preview</h3>
+        <iframe
+          src="${embedUrl}"
+          title="YouTube video player"
+          allowfullscreen>
+        </iframe>
+      `;
+    }
+
+    async function copyCode() {
+      const output = document.getElementById('embedCode');
+
+      if (!output.value) {
+        return;
+      }
+
+      await navigator.clipboard.writeText(output.value);
+
+      const button = document.querySelector('.copy-btn');
+      const originalText = button.textContent;
+
+      button.textContent = 'Copied!';
+
+      setTimeout(() => {
+        button.textContent = originalText;
+      }, 1500);
+    }
+  </script>
+</body>
+</html>
